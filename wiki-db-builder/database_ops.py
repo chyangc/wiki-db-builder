@@ -70,9 +70,9 @@ def list_tables(conn, schema: str):
 def list_columns(conn, schema: str, table: str):
     with conn.cursor() as cur:
         try:
-            cur.execute(
+            cur.execute( # SELECT column_name, data_type, is_nullable, column_default
                 """
-                SELECT column_name, data_type, is_nullable, column_default
+                SELECT column_name, data_type
                 FROM information_schema.columns
                 WHERE table_schema = %s
                 AND table_name = %s;
@@ -84,7 +84,7 @@ def list_columns(conn, schema: str, table: str):
 
 
 def add_table(cur, name: str, cols: list[str]):
-    scols = [sql.SQL("{} text").format(sql.Identifier('|name'))]
+    scols = [sql.SQL("{} varchar(255)").format(sql.Identifier('|name'))]
     scols += [sql.SQL("{} text").format(sql.Identifier(item)) for item in cols]
     # scols.insert(0, sql.SQL("{} text"))
     query = sql.SQL("CREATE TABLE {table} ({fields});").format(

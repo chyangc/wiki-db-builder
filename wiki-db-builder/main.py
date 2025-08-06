@@ -4,26 +4,23 @@ import database_ops as db
 import wikiparser
 # import mwparserfromhell as mwp
 # import psycopg2
+import config
 
-base = "https://{}/wiki/{}?action=raw"
-wiki = "calamitymod.wiki.gg"
-item = "Wingman"
-url = base.format(wiki, item)
-print(url)
+schema = config.schema # 'wikidb'
+conn = db.connect()
 
-response = requests.get(url)
-# print(response)
-# wikiparser.process_page(response.text)
+with conn.cursor() as cur:
+    cur.execute("SET search_path TO %s", (schema,))
 
 tables = templatedata.TableSet()
-conn = db.connect()
-tabs = db.list_tables(conn, 'public')
+
+tabs = db.list_tables(conn, schema)
 print(tabs)
 if tabs is not None:
     for tab in tabs:
         table_name = tab[0]
         tables.add_template(table_name)
-        cols = db.list_columns(conn, 'public', table_name)
+        cols = db.list_columns(conn, schema, table_name)
         print(cols)
         if cols is not None:
             for col in cols:
@@ -37,12 +34,24 @@ for a, b in tables.data.items():
     print(op)
 
 
+
+
+base = config.base # "https://{}/wiki/{}?action=raw"
+wiki = config.wiki # "calamitymod.wiki.gg"
+page = config.page # "Wingman"
+url = base.format(wiki, page)
+print(url)
+response = requests.get(url)
+
+
+
+
 print("\n\nCOMMENCING OPERATION\n\n")
 
-wikiparser.process_page(conn, tables, item, response.text)
+wikiparser.process_page(conn, tables, page, response.text)
 
-print(db.list_tables(conn, 'public'), '\n')
-print(db.list_columns(conn, 'public', 'item infobox'), '\n')
+print(db.list_tables(conn, schema), '\n')
+print(db.list_columns(conn, schema, 'item infobox'), '\n')
 
 with conn.cursor() as cur:
     cur.execute('select * from "item infobox"')
