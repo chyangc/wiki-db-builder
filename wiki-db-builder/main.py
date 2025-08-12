@@ -1,14 +1,15 @@
-import requests
+# import requests
 import templatedata
 import database_ops as db
 import wikiparser
 # import mwparserfromhell as mwp
 # import psycopg2
 import config
+import mwconnect
+
+conn = db.connect(config.dbname, config.user, config.host, config.password)
 
 schema = config.schema # 'wikidb'
-conn = db.connect()
-
 with conn.cursor() as cur:
     cur.execute("SET search_path TO %s", (schema,))
 
@@ -33,18 +34,11 @@ for a, b in tables.data.items():
         op += " " + c
     print(op)
 
+api = mwconnect.mwconnect()
 
-
-
-base = config.base # "https://{}/wiki/{}?action=raw"
 wiki = config.wiki # "calamitymod.wiki.gg"
 page = config.page # "Wingman"
-url = base.format(wiki, page)
-print(url)
-response = requests.get(url)
-
-
-
+response = api.get_page_raw(wiki, page)
 
 print("\n\nCOMMENCING OPERATION\n\n")
 

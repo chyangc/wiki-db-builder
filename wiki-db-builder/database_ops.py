@@ -4,9 +4,9 @@ from psycopg2 import sql
 
 # conn: psycopg2.extensions.connection
 
-def connect():
+def connect(dbname: str, user: str, host: str, password: str):
     try:
-        conn = psycopg2.connect("dbname='wikidata' user='wikireader' host='localhost' password='test'")
+        conn = psycopg2.connect(f"dbname='{dbname}' user='{user}' host='{host}' password='{password}'")
     except:
         print("I am unable to connect to the database")
         sys.exit()
