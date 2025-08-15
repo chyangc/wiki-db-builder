@@ -1,6 +1,6 @@
 import requests
 
-class mwconnect:
+class Connection:
     S: requests.Session
 
     def __init__(self) -> None:

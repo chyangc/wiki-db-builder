@@ -34,7 +34,7 @@ for a, b in tables.data.items():
         op += " " + c
     print(op)
 
-api = mwconnect.mwconnect()
+api = mwconnect.Connection()
 
 wiki = config.wiki # "calamitymod.wiki.gg"
 page = config.page # "Wingman"

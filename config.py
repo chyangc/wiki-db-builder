@@ -1,16 +1,22 @@
-dbname = 'wikidata'
-user = 'wikireader'
-host = 'localhost'
-password = 'test'
+dbname: str = 'wikidata'
+user: str = 'wikireader'
+host: str = 'localhost'
+password: str = 'test'
 
-schema = 'wikidb'
+schema: str = 'wikidb'
 
 # base = "https://{}/wiki/{}?action=raw"
-wiki = "calamitymod.wiki.gg"
-wiki_api = "https://calamitymod.wiki.gg/api.php"
+wiki: str = "calamitymod.wiki.gg"
+wiki_api: str = "https://calamitymod.wiki.gg/api.php"
 
-# mode = 0
+#
+read_mode = 0
+page: str = "Wingman"
+category: str = "Tool items"
 
-page = "Wingman"
 
-category = "Tool items"
+filter_mode: int = 0
+select_templates: list[str] = []
+ignore_templates: list[str] = []
+
+
