@@ -1,12 +1,15 @@
+#!/usr/bin/env python3
+
 # import requests
 import templatedata
-import database_ops as db
+import database_ops as dbops
 import wikiparser
 # import mwparserfromhell as mwp
 # import psycopg2
-import config
 import mwconnect
+import config
 
+db = dbops.DatabaseConnection()
 conn = db.connect(config.dbname, config.user, config.host, config.password)
 
 schema = config.schema # 'wikidb'
@@ -15,13 +18,13 @@ with conn.cursor() as cur:
 
 tables = templatedata.TableSet()
 
-tabs = db.list_tables(conn, schema)
+tabs = db.list_tables(schema)
 print(tabs)
 if tabs is not None:
     for tab in tabs:
         table_name = tab[0]
         tables.add_template(table_name)
-        cols = db.list_columns(conn, schema, table_name)
+        cols = db.list_columns(schema, table_name)
         print(cols)
         if cols is not None:
             for col in cols:
@@ -42,10 +45,10 @@ response = api.get_page_raw(wiki, page)
 
 print("\n\nCOMMENCING OPERATION\n\n")
 
-wikiparser.process_page(conn, tables, page, response.text)
+wikiparser.process_page(db, tables, page, response.text)
 
-print(db.list_tables(conn, schema), '\n')
-print(db.list_columns(conn, schema, 'item infobox'), '\n')
+print(db.list_tables(schema), '\n')
+print(db.list_columns(schema, 'item infobox'), '\n')
 
 with conn.cursor() as cur:
     cur.execute('select * from "item infobox"')

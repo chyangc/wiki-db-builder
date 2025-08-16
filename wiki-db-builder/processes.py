@@ -1,5 +1,5 @@
 import templatedata
-import database_ops as db
+import database_ops as dbops
 # import wikiparser
 import mwconnect
 
@@ -7,6 +7,7 @@ import mwparserfromhell as mwp
 import config
 
 def load_db_conn():
+    db = dbops.DatabaseConnection()
     conn = db.connect(config.dbname, config.user, config.host, config.password)
 
     schema = config.schema # 'wikidb'
@@ -15,16 +16,16 @@ def load_db_conn():
     
     return conn
 
-def load_tables(conn, schema):
+def load_tables(db, schema):
     tables = templatedata.TableSet()
 
-    tabs = db.list_tables(conn, schema)
+    tabs = db.list_tables(schema)
     print(tabs)
     if tabs is not None:
         for tab in tabs:
             table_name = tab[0]
             tables.add_template(table_name)
-            cols = db.list_columns(conn, schema, table_name)
+            cols = db.list_columns(schema, table_name)
             print(cols)
             if cols is not None:
                 for col in cols:
@@ -44,18 +45,18 @@ def load_wiki_conn():
     api = mwconnect.Connection()
     return api
 # ?
-
-def get_page(api, conn, tables, schema):
+# ?
+def get_page(api, db: dbops.DatabaseConnection, tables, schema):
     wiki = config.wiki # "calamitymod.wiki.gg"
     page = config.page # "Wingman"
     response = api.get_page_raw(wiki, page)
 
-    process_page(conn, tables, page, response.text)
+    process_page(db, tables, page, response.text)
 
-    print(db.list_tables(conn, schema), '\n')
-    print(db.list_columns(conn, schema, 'item infobox'), '\n')
+    print(db.list_tables(schema), '\n')
+    print(db.list_columns(schema, 'item infobox'), '\n')
 
-    with conn.cursor() as cur:
+    with db.conn.cursor() as cur:
         cur.execute('select * from "item infobox"')
         a = cur.fetchall()
         print(a)
@@ -65,35 +66,31 @@ def get_page(api, conn, tables, schema):
 
 # ---- from wikiparser ----
 
-def process_page(conn, tables, title: str, content: str):
+def process_page(db: dbops.DatabaseConnection, tables, title: str, content: str):
     wkt = mwp.parse(content)
     templates = wkt.filter_templates()
     # print(templates)
     for template in templates:
-        process_template(conn, tables, title, template)
+        process_template(db, tables, title, template)
 
 
-def process_template(conn, tables, title: str, template: mwp.nodes.Template):
+def process_template(db: dbops.DatabaseConnection, tables, title: str, template: mwp.nodes.Template):
     # print(template.name)
-    with conn.cursor() as cur:
-        try:
-            name = template.name.strip()
-            a = tables.add_template(name)
-            if a:
-                db.add_table(cur, name, [])
+    name = template.name.strip()
+    a = tables.add_template(name)
+    if a:
+        db.add_table(name, [])
 
-            vals = {'|name': title}
-            for param in template.params:
-                param_name = param.name.strip()
-                b = tables.add_param(name, param_name)
-                if b:
-                    db.add_col(cur, name, param_name)
-                
-                vals.setdefault(param_name, param.value.strip())
-            
-            db.add_row(cur, name, vals)
-        except Exception as error: # (Exception, psycopg2.DatabaseError) as error:
-            print(error)
+    vals = {'|name': title}
+    for param in template.params:
+        param_name = param.name.strip()
+        b = tables.add_param(name, param_name)
+        if b:
+            db.add_col(name, param_name)
+        
+        vals.setdefault(param_name, param.value.strip())
+    
+    db.add_row(name, vals)
 
 
 
