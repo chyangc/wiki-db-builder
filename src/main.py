@@ -6,7 +6,7 @@ import config
 
 schema = config.schema
 
-db = processes.load_db_conn()
+db = processes.load_db_conn(config.dbname, config.user, config.host, config.password, schema)
 tables = processes.load_tables(db, schema)
 api = processes.load_wiki_conn()
 
@@ -19,13 +19,10 @@ print("\n\nCOMMENCING OPERATION\n\n")
 wikiparser.process_page(db, tables, page, response.text)
 
 print(db.list_tables(schema), '\n')
-print(db.list_columns(schema, 'item infobox'), '\n')
 
-with db.conn.cursor() as cur:
-    cur.execute('select * from "item infobox"')
-    a = cur.fetchall()
-    print(a)
+col_list = db.list_columns(schema, 'item infobox')
+print(col_list, '\n')
 
-
+print(db.select('item infobox', [item[0] for item in col_list]))
 
 

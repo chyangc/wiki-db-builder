@@ -3,17 +3,13 @@ import database_ops as dbops
 # import wikiparser
 import mwconnect
 
-import mwparserfromhell as mwp
-import config
+# import config
 
-def load_db_conn():
+def load_db_conn(dbname, user, host, password, schema):
     db = dbops.DatabaseConnection()
-    conn = db.connect(config.dbname, config.user, config.host, config.password)
-
-    schema = config.schema # 'wikidb'
+    conn = db.connect(dbname, user, host, password)
     with conn.cursor() as cur:
         cur.execute("SET search_path TO %s", (schema,))
-    
     return db
 
 def load_tables(db, schema):

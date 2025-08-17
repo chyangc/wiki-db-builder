@@ -15,30 +15,6 @@ class DatabaseConnection:
 
     # ---------------=====---------------=====---------------
 
-    def list_tables(self, schema: str):
-        with self.conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT tablename
-                FROM pg_catalog.pg_tables
-                WHERE schemaname = %s;
-                """, (schema,)
-            )
-            return cur.fetchall()
-
-    def list_columns(self, schema: str, table: str):
-        with self.conn.cursor() as cur:
-            cur.execute( # SELECT column_name, data_type, is_nullable, column_default
-                """
-                SELECT column_name, data_type
-                FROM information_schema.columns
-                WHERE table_schema = %s
-                AND table_name = %s;
-                """, (schema, table)
-            )
-            return cur.fetchall()
-
-
     def add_table(self, name: str, cols: list[str]):
         with self.conn.cursor() as cur:
             scols = [
@@ -83,4 +59,39 @@ class DatabaseConnection:
 
     def remove_rows(self, table: str, condition: dict[str, str]):
         pass
+
+# ---------------=====---------------=====---------------
+
+    def list_tables(self, schema: str):
+        with self.conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT tablename
+                FROM pg_catalog.pg_tables
+                WHERE schemaname = %s;
+                """, (schema,)
+            )
+            return cur.fetchall()
+
+    def list_columns(self, schema: str, table: str):
+        with self.conn.cursor() as cur:
+            cur.execute( # SELECT column_name, data_type, is_nullable, column_default
+                """
+                SELECT column_name, data_type
+                FROM information_schema.columns
+                WHERE table_schema = %s
+                AND table_name = %s;
+                """, (schema, table)
+            )
+            return cur.fetchall()
+
+    def select(self, table: str, columns: list[str]):
+        with self.conn.cursor() as cur:
+            query = sql.SQL("SELECT {cols} FROM {tab}").format(
+                cols = sql.SQL(',').join(map(sql.Identifier, columns)),
+                tab = sql.Identifier(table)
+            )
+            cur.execute(query)
+            return cur.fetchall()
+
 
