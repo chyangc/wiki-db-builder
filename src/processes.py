@@ -5,14 +5,13 @@ import mwconnect
 
 # import config
 
-def load_db_conn(dbname, user, host, password, schema):
+def load_db_conn(dbname: str, user: str, host: str, password: str, schema: str):
     db = dbops.DatabaseConnection()
-    conn = db.connect(dbname, user, host, password)
-    with conn.cursor() as cur:
-        cur.execute("SET search_path TO %s", (schema,))
+    db.connect(dbname, user, host, password)
+    db.setup(schema)
     return db
 
-def load_tables(db, schema):
+def load_tables(db: dbops.DatabaseConnection, schema: str):
     tables = templatedata.TableSet()
 
     tabs = db.list_tables(schema)
@@ -39,7 +38,7 @@ def load_tables(db, schema):
 def load_wiki_conn():
     api = mwconnect.Connection()
     return api
-
+# ?
 
 # def get_page(api, db: dbops.DatabaseConnection, tables, schema):
 #     wiki = config.wiki # "calamitymod.wiki.gg"

@@ -25,9 +25,9 @@ def process_template(db: dbops.DatabaseConnection, tables, title: str, template:
     name = template.name.strip()
     a = tables.add_template(name)
     if a:
-        db.add_table(name, [])
+        db.add_template(name, [])
 
-    vals = {'|name': title}
+    vals: dict[str, str] = {} # {'|name': title}
     for param in template.params:
         param_name = param.name.strip()
         b = tables.add_param(name, param_name)
@@ -36,7 +36,7 @@ def process_template(db: dbops.DatabaseConnection, tables, title: str, template:
         
         vals.setdefault(param_name, param.value.strip())
     
-    db.add_row(name, vals)
+    db.add_entry(name, title, vals)
 
 
 
