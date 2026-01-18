@@ -17,15 +17,14 @@ def process_page(db: dbops.DatabaseConnection, tables, title: str, content: str)
         id = process_template(db, tables, title, item[0], item[1])
 
         sub_templates = [a for b in [param.value.filter_templates() for param in item[0].params] for a in b]
-        stack += [(sub_template, (id, item[0].name.strip())) for sub_template in sub_templates]
-
+        stack += [(sub_template, (id, clean_name(item[0].name))) for sub_template in sub_templates]
 
     #
 
 
 def process_template(db: dbops.DatabaseConnection, tables, title: str, template: mwp.nodes.Template, container):
     # print(template.name)
-    name = template.name.strip()
+    name = clean_name(template.name)
     a = tables.add_template(name)
     if a:
         db.add_template_table(name, [])
@@ -38,17 +37,18 @@ def process_template(db: dbops.DatabaseConnection, tables, title: str, template:
         vals.setdefault(dbops.TEMPLATE_CONTAINER_PARAM, container[1])
     
     for param in template.params:
-        param_name = param.name.strip()
+        param_name = clean_name(param.name)
         b = tables.add_param(name, param_name)
         if b:
             db.add_col(name, param_name)
         
-        vals.setdefault(param_name, param.value.strip())
+        vals.setdefault(param_name, clean_name(param.value))
     
     return db.add_entry(name, vals)
 
 
-
+def clean_name(name: mwp.wikicode.Wikicode) -> str:
+    return name.strip()
 
 
 
