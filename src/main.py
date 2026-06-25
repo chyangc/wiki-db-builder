@@ -24,9 +24,18 @@ def test_page_api():
     page = config.page # "Wingman"
     response = api.get_page(wiki, page)
 
-    print(f"\n\nProcessing page: {wiki}, {page}\n\n")
+    print(f"\n\nProcessing page by api: {wiki}, {page}\n\n")
 
     wikiparser.process_page(db, tables, page, response.text)
+
+def test_page_category():
+    wiki = config.wiki_api # "https://calamitymod.wiki.gg/api.php"
+    category = config.category # "Tool items"
+    pages = api.get_pages_by_category(wiki, category)
+
+    print(f"\n\nProcessing pages by category: {wiki}, {category}\n\n")
+
+    wikiparser.process_all_pages(db, tables, pages)
 
 def print_db_test(table: str):
     print(db.list_tables(schema), '\n')

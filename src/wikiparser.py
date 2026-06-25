@@ -21,6 +21,19 @@ def process_page(db: dbops.DatabaseConnection, tables, title: str, content: str)
 
     #
 
+def process_all_pages(db: dbops.DatabaseConnection, tables, pages):
+    # pages = data.get("query", {}).get("pages", [])
+    for page in pages:
+        title = page.get("title")
+        revisions = page.get("revisions", [])
+        if revisions:
+            content = revisions[0].get("slots", {}).get("main", {}).get("content", "")
+        else:
+            content = ""
+
+        process_page(db, tables, title, content)
+    #
+
 
 def process_template(db: dbops.DatabaseConnection, tables, title: str, template: mwp.nodes.Template, container):
     # print(template.name)

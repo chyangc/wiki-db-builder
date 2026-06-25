@@ -24,7 +24,7 @@ class Connection:
         }
         return self.S.get(url=URL, params=PARAMS)
 
-    def get_pages(self, wiki_api: str, pages: list[str]) -> requests.Response:
+    def get_pages_by_title(self, wiki_api: str, pages: list[str]) -> requests.Response:
         URL = wiki_api
         PARAMS = {
             "action": "query",
@@ -36,6 +36,36 @@ class Connection:
             "format": "json"
         }
         return self.S.get(url=URL, params=PARAMS)
+
+    def get_pages_by_category(self, wiki_api: str, category: str) -> list:
+        URL = wiki_api
+        PARAMS = {
+            "action": "query",
+            "prop": "revisions",
+            "generator": "categorymembers",
+            "gcmtitle": f"{category}",
+            "gcmlimit": "max",
+            "rvprop": "content",
+            "rvslots": "main",
+            "formatversion": "2",
+            "format": "json"
+        }
+
+        all_pages = []
+
+        while True:
+            response = self.S.get(url=URL, params=PARAMS)
+            data = response.json()
+            
+            batch_pages = data.get("query", {}).get("pages", [])
+            all_pages.extend(batch_pages)
+            
+            if "continue" in data:
+                PARAMS.update(data["continue"])
+            else:
+                break
+                
+        return all_pages
 
     #
 
